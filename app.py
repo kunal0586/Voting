@@ -10,7 +10,6 @@ db = SQLAlchemy()
 
 
 def create_app():
-    # ✅ indented properly
     app = Flask(__name__, static_folder="static", static_url_path="")
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
         "SQLALCHEMY_DATABASE_URI", "sqlite:///database.db"
@@ -27,15 +26,15 @@ def create_app():
     JWTManager(app)
 
     # blueprints
-    from routes.auth import auth_bp
-    from routes.events import events_bp
-    from routes.exports import export_bp
+    from auth import auth_bp
+    from events import events_bp
+    from exports import export_bp
 
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(events_bp, url_prefix="/api")
     app.register_blueprint(export_bp, url_prefix="/api/export")
 
-    # ✅ serve frontend
+    # serve frontend
     @app.route("/")
     def index():
         return send_from_directory("static", "index.html")
@@ -49,7 +48,7 @@ def create_app():
         return jsonify(ok=True, service="Online Voting Flask Backend", version="1.0.0")
 
     with app.app_context():
-        from routes.models import init_db, seed_admin
+        from models import init_db, seed_admin
 
         init_db()
         seed_admin()
@@ -57,8 +56,10 @@ def create_app():
     return app
 
 
+# ✅ Global app object for Gunicorn
+app = create_app()
+
 if __name__ == "__main__":
-    app = create_app()
     port = int(os.getenv("FLASK_RUN_PORT", 5000))
     app.run(
         host="0.0.0.0",
